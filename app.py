@@ -4,9 +4,17 @@ import requests
 from bs4 import BeautifulSoup
 import logging
 from flask.json.provider import DefaultJSONProvider
+from flask import Flask, render_template
 
-app = Flask(__name__)
-app.json_provider_class.compact = True
+app = Flask(__name__, static_folder='static', template_folder='templates')
+
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+
+# app = Flask(__name__)
+# app.json_provider_class.compact = True
 
 
 CORS(app)
@@ -145,6 +153,7 @@ def meta():
         "version": "1.0.0"
     })
 
-if __name__ == '__main__':
-    logger.info("Starting Universal Feature Comparator API...")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+# if __name__ == '__main__':
+#     logger.info("Starting Universal Feature Comparator API...")
+#     app.run(debug=True, host='0.0.0.0', port=5000)
+
