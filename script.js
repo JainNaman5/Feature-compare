@@ -154,81 +154,48 @@ function simulatePythonResponse(url1, url2) {
     return { data1: data1, data2: data2 };
 }
 
-// function displayResults(data) {
-//     resultsSection.classList.remove('hidden');
 
-//     const allFeatures = new Set([
-//         ...Object.keys(data.data1),
-//         ...Object.keys(data.data2)
-//     ]);
-    
-//     // Create table headers
-//     tableHeaders.innerHTML = `
-//         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Feature</th>
-//         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${data.data1['Product'] || 'Item 1'}</th>
-//         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${data.data2['Product'] || 'Item 2'}</th>
-//     `;
-
-//     // Populate table rows
-//     allFeatures.forEach(feature => {
-//         if (feature === 'Product') return; // Skip product name as it's used in headers
-
-//         const value1 = data.data1[feature] || 'N/A';
-//         const value2 = data.data2[feature] || 'N/A';
-
-//         const row = document.createElement('tr');
-//         row.classList.add('hover:bg-gray-50', 'transition-colors', 'duration-200');
-
-//         // Highlight differences
-//         const isDifferent = value1 !== value2;
-//         const cellClass = isDifferent ? 'text-gray-900' : 'text-gray-500';
-
-//         row.innerHTML = `
-//             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${feature}</td>
-//             <td class="px-6 py-4 whitespace-nowrap text-sm ${cellClass}">${value1}</td>
-//             <td class="px-6 py-4 whitespace-nowrap text-sm ${cellClass}">${value2}</td>
-//         `;
-
-//         tableBody.appendChild(row);
-//     });
-
-//     // Scroll to results
-//     resultsSection.scrollIntoView({ behavior: 'smooth' });
-
-// }
 
 function displayResults(data) {
     resultsSection.classList.remove('hidden');
+    showJsonOutput(data);
 
-    const products = [data.data1, data.data2];
-    const allFeatures = new Set();
+    const allFeatures = new Set([
+        ...Object.keys(data.data1),
+        ...Object.keys(data.data2)
+    ]);
 
-    products.forEach(product => {
-        Object.keys(product).forEach(key => {
-            if (key !== 'Product') allFeatures.add(key);
-        });
-    });
-
-    // Create table headers
     tableHeaders.innerHTML = `
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-        ${[...allFeatures].map(feature => `
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${feature}</th>
-        `).join('')}
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Feature</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${data.data1['Product'] || 'Item 1'}</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${data.data2['Product'] || 'Item 2'}</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Feature Name</th>
     `;
 
-    // Create table rows
-    tableBody.innerHTML = products.map(product => {
-        const row = `
-            <tr class="hover:bg-gray-50 transition-colors duration-200">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${product.Product || 'Unnamed'}</td>
-                ${[...allFeatures].map(feature => `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${product[feature] || 'N/A'}</td>
-                `).join('')}
-            </tr>
+    allFeatures.forEach(feature => {
+        if (feature === 'Product') return;
+
+        const value1 = data.data1[feature] || 'N/A';
+        const value2 = data.data2[feature] || 'N/A';
+        const isDifferent = value1 !== value2;
+        const cellClass = isDifferent ? 'text-gray-900' : 'text-gray-500';
+
+        const row = document.createElement('tr');
+        row.classList.add('hover:bg-gray-50', 'transition-colors', 'duration-200');
+
+        row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${feature}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm ${cellClass}">${value1}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm ${cellClass}">${value2}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600">${feature}</td>
         `;
-        return row;
-    }).join('');
+
+        tableBody.appendChild(row);
+    });
+
+    resultsSection.scrollIntoView({ behavior: 'smooth' });
 }
+
+
 
 
