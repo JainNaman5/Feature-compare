@@ -3,7 +3,7 @@ from flask_cors import CORS
 import requests
 from bs4 import BeautifulSoup
 import logging
-from playwright.sync_api import sync_playwright
+from requests_html import HTMLSession
 
 app = Flask(__name__)
 CORS(app)
@@ -45,55 +45,51 @@ def normalize_key(key):
 
 def scrape_dynamic_features(url):
     try:
-        logger.info(f"Dynamic scraping: {url}")
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            page.goto(url, timeout=60000)
-            page.wait_for_timeout(3000)
+        logger.info(f"Scraping with requests-html: {url}")
+        session = HTMLSession()
+        r = session.get(url)
+        r.html.render(timeout=20)
 
-            data = {}
+        data = {}
 
-            if 'amazon' in url:
-                title = page.query_selector('#productTitle')
-                price = page.query_selector('.a-price .a-offscreen')
-                specs = page.query_selector_all('#productDetails_techSpec_section_1 tr, #productDetails_detailBullets_sections1 tr')
+        if 'amazon' in url:
+            title = r.html.find('#productTitle', first=True)
+            price = r.html.find('.a-price .a-offscreen', first=True)
+            specs = r.html.find('#productDetails_techSpec_section_1 tr, #productDetails_detailBullets_sections1 tr')
 
-                data['Product'] = title.inner_text().strip() if title else 'N/A'
-                data['Price'] = price.inner_text().strip() if price else 'N/A'
+            data['Product'] = title.text.strip() if title else 'N/A'
+            data['Price'] = price.text.strip() if price else 'N/A'
 
-                for spec in specs:
-                    key_el = spec.query_selector('th')
-                    val_el = spec.query_selector('td')
-                    if key_el and val_el:
-                        key = normalize_key(key_el.inner_text().strip())
-                        val = val_el.inner_text().strip()
+            for spec in specs:
+                key_el = spec.find('th', first=True)
+                val_el = spec.find('td', first=True)
+                if key_el and val_el:
+                    key = normalize_key(key_el.text.strip())
+                    val = val_el.text.strip()
+                    data[key] = val
+
+        elif 'flipkart' in url:
+            title = r.html.find('span.B_NuCI', first=True)
+            price = r.html.find('div._30jeq3._16Jk6d', first=True)
+            specs = r.html.find('div._1UhVsV > div')
+
+            data['Product'] = title.text.strip() if title else 'N/A'
+            data['Price'] = price.text.strip() if price else 'N/A'
+
+            for section in specs:
+                rows = section.find('tr')
+                for row in rows:
+                    cells = row.find('td')
+                    if len(cells) == 2:
+                        key = normalize_key(cells[0].text.strip())
+                        val = cells[1].text.strip()
                         data[key] = val
 
-            elif 'flipkart' in url:
-                title = page.query_selector('span.B_NuCI')
-                price = page.query_selector('div._30jeq3._16Jk6d')
-                specs = page.query_selector_all('div._1UhVsV > div')
+        else:
+            return {'error': 'Unsupported platform'}
 
-                data['Product'] = title.inner_text().strip() if title else 'N/A'
-                data['Price'] = price.inner_text().strip() if price else 'N/A'
-
-                for section in specs:
-                    rows = section.query_selector_all('tr')
-                    for row in rows:
-                        cells = row.query_selector_all('td')
-                        if len(cells) == 2:
-                            key = normalize_key(cells[0].inner_text().strip())
-                            val = cells[1].inner_text().strip()
-                            data[key] = val
-
-            else:
-                browser.close()
-                return {'error': 'Unsupported platform'}
-
-            browser.close()
-            logger.info(f"Scraped {len(data)} features from {url}")
-            return data
+        logger.info(f"Scraped {len(data)} features from {url}")
+        return data
 
     except Exception as e:
         logger.error(f"Scraping error: {e}")
@@ -248,5 +244,6 @@ def meta():
 # if __name__ == '__main__':
 #     logger.info("Starting Universal Feature Comparator API...")
 #     app.run(debug=True, host='0.0.0.0', port=5000)
+
 
 
