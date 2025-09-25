@@ -20,24 +20,18 @@ body {
     animation: spin 1s ease infinite;
 }
 
-.scroll-box {
-  max-height: 300px; /* or whatever fits your layout */
-  overflow-y: auto;
-  padding: 10px;
-  border: 1px solid #ccc;
-  background-color: #f9f9f9;
-  font-family: monospace;
-}
-
-.product-list {
-  max-height: 400px;
-  overflow-y: scroll;
-  display: block;
-}
-
-
-
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+#comparison-results::-webkit-scrollbar,
+#json-output-section::-webkit-scrollbar {
+    width: 8px;
+}
+
+#comparison-results::-webkit-scrollbar-thumb,
+#json-output-section::-webkit-scrollbar-thumb {
+    background-color: #cbd5e0;
+    border-radius: 4px;
 }
