@@ -10,7 +10,7 @@ const modalMessage = document.getElementById('modal-message');
 const modalCloseBtn = document.getElementById('modal-close-btn');
 
 // Configuration - change this to your backend URL
-const API_BASE_URL = 'https://compare26.onrender.com';
+const API_BASE_URL = 'https://feature-compare.onrender.com';
 
 // Function to show the custom modal
 function showModal(message) {
@@ -195,6 +195,7 @@ function displayResults(data) {
 
     resultsSection.scrollIntoView({ behavior: 'smooth' });
 }
+
 
 
 
